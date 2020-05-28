@@ -18,7 +18,7 @@ package com.amazonaws.samples.kaja.taxi.consumer;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.samples.kaja.taxi.consumer.events.EventDeserializationSchema;
 import com.amazonaws.samples.kaja.taxi.consumer.events.TimestampAssigner;
-import com.amazonaws.samples.kaja.taxi.consumer.events.es.*;
+import com.amazonaws.samples.kaja.taxi.consumer.events.es.TripRecord;
 import com.amazonaws.samples.kaja.taxi.consumer.events.kinesis.Event;
 import com.amazonaws.samples.kaja.taxi.consumer.events.kinesis.TripEvent;
 import com.amazonaws.samples.kaja.taxi.consumer.operators.*;
@@ -107,34 +107,9 @@ public class ProcessTaxiStream {
         //remove all events with geo coordinates outside of NYC
         .filter(GeoUtils::hasValidCoordinates);
 
+    // ETL - tranfer data and add new attributes
+    DataStream<TripRecord> tripRecords = trips.flatMap(new TripToTripRecord());
 
-    DataStream<PickupCount> pickupCounts = trips
-        //compute geo hash for every event
-        .map(new TripToGeoHash())
-        .keyBy("pickupHash")
-        //collect all events in a one second window
-        .timeWindow(Time.seconds(1))
-        //count events per geo hash in the one second window
-        .apply(new CountByPickupHash());
-        
-    DataStream<DropoffCount> dropoffCounts = trips
-        //compute geo hash for every event
-        .map(new TripToGeoHash())
-        .keyBy("dropoffHash")
-        //collect all events in a one second window
-        .timeWindow(Time.seconds(1))
-        //count events per geo hash in the one second window
-        .apply(new CountByDropoffHash());
-
-
-    DataStream<AverageTripDuration> tripDurations = trips
-        .flatMap(new TripToTripDuration())
-        .keyBy("pickupGeoHash", "airportCode")
-        .timeWindow(Time.minutes(10))
-        .apply(new TripDurationToAverageTripDuration());
-        
-    DataStream<TripRecord> tripRecords = trips
-        .flatMap(new TripToTripRecord());
 
     if (parameter.has("ElasticsearchEndpoint")) {
       String elasticsearchEndpoint = parameter.get("ElasticsearchEndpoint");
@@ -145,9 +120,6 @@ public class ProcessTaxiStream {
         elasticsearchEndpoint = elasticsearchEndpoint.substring(0, elasticsearchEndpoint.length()-1);
       }
 
-      pickupCounts.addSink(AmazonElasticsearchSink.buildElasticsearchSink(elasticsearchEndpoint, region, "pickup", "pickup"));
-      dropoffCounts.addSink(AmazonElasticsearchSink.buildElasticsearchSink(elasticsearchEndpoint, region, "dropoff", "dropoff"));
-      tripDurations.addSink(AmazonElasticsearchSink.buildElasticsearchSink(elasticsearchEndpoint, region, "trip_duration", "trip_duration"));
       tripRecords.addSink(AmazonElasticsearchSink.buildElasticsearchSink(elasticsearchEndpoint, region, "trip_record", "trip_record"));
     }
 

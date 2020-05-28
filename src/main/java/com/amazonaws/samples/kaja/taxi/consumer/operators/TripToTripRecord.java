@@ -19,13 +19,13 @@ public class TripToTripRecord implements FlatMapFunction<TripEvent, TripRecord> 
   public void flatMap(TripEvent tripEvent, Collector<TripRecord> collector) {
     double pickupLatitude = tripEvent.pickupLatitude;
     double pickupLongitude = tripEvent.pickupLongitude;
-    String pickupLocation = GeoHash.geoHashStringWithCharacterPrecision(tripEvent.pickupLatitude, tripEvent.pickupLongitude, 7);
+    String pickupLocation = GeoHash.geoHashStringWithCharacterPrecision(tripEvent.pickupLatitude, tripEvent.pickupLongitude, 8);
     double dropoffLatitude = tripEvent.dropoffLatitude;
     double dropoffLongitude = tripEvent.dropoffLongitude;
-    String dropoffLocation = GeoHash.geoHashStringWithCharacterPrecision(tripEvent.dropoffLatitude, tripEvent.dropoffLongitude, 7);
+    String dropoffLocation = GeoHash.geoHashStringWithCharacterPrecision(tripEvent.dropoffLatitude, tripEvent.dropoffLongitude, 8);
     double travelFee = tripEvent.totalAmount;
-    Instant pickupDatetime = tripEvent.pickupDatetime;
-    Instant dropoffDatetime = tripEvent.dropoffDatetime;
+    long pickupDatetime = tripEvent.pickupDatetime;
+    long dropoffDatetime = tripEvent.dropoffDatetime;
     
     // Calculate distance between pickupLocation and dropoffLocation using Sphere
     GlobalCoordinates pickup = new GlobalCoordinates(pickupLatitude, pickupLongitude);
