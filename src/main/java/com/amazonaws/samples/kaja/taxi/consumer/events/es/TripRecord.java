@@ -15,10 +15,6 @@
 
 package com.amazonaws.samples.kaja.taxi.consumer.events.es;
 
-import java.time.Instant;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 public class TripRecord extends Document {
   public final double pickupLatitude;
@@ -35,7 +31,7 @@ public class TripRecord extends Document {
   public final double averageSpeed;
   
 
-  public TripRecord(double pickupLatitude, double pickupLongitude, String pickupLocation, double dropoffLatitude, double dropoffLongitude, String dropoffLocation, double travelFee, Instant pickupDatetime, Instant dropoffDatetime, double travelDistance, long travelTime, double averageSpeed, long timestamp) {
+  public TripRecord(double pickupLatitude, double pickupLongitude, String pickupLocation, double dropoffLatitude, double dropoffLongitude, String dropoffLocation, double travelFee, long pickupDatetime, long dropoffDatetime, double travelDistance, long travelTime, double averageSpeed, long timestamp) {
     super(timestamp);
 
     this.pickupLatitude = pickupLatitude;
@@ -45,8 +41,8 @@ public class TripRecord extends Document {
     this.dropoffLongitude = dropoffLongitude;
     this.dropoffLocation = dropoffLocation;
     this.travelFee = travelFee;
-    this.pickupDatetime = pickupDatetime.toEpochMilli();
-    this.dropoffDatetime = dropoffDatetime.toEpochMilli();
+    this.pickupDatetime = pickupDatetime;
+    this.dropoffDatetime = dropoffDatetime;
     this.travelDistance = travelDistance;
     this.travelTime = travelTime;
     this.averageSpeed = averageSpeed;

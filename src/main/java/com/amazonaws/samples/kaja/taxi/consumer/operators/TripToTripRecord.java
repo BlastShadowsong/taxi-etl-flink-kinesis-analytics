@@ -8,6 +8,8 @@ import java.time.Duration;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.util.Collector;
 import java.time.Instant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.gavaghan.geodesy.Ellipsoid;
 import org.gavaghan.geodesy.GeodeticCalculator;
@@ -24,8 +26,8 @@ public class TripToTripRecord implements FlatMapFunction<TripEvent, TripRecord> 
     double dropoffLongitude = tripEvent.dropoffLongitude;
     String dropoffLocation = GeoHash.geoHashStringWithCharacterPrecision(tripEvent.dropoffLatitude, tripEvent.dropoffLongitude, 8);
     double travelFee = tripEvent.totalAmount;
-    long pickupDatetime = tripEvent.pickupDatetime;
-    long dropoffDatetime = tripEvent.dropoffDatetime;
+    long pickupDatetime = tripEvent.pickupDatetime.toEpochMilli();
+    long dropoffDatetime = tripEvent.dropoffDatetime.toEpochMilli();
     
     // Calculate distance between pickupLocation and dropoffLocation using Sphere
     GlobalCoordinates pickup = new GlobalCoordinates(pickupLatitude, pickupLongitude);
